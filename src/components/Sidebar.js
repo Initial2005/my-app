@@ -1,32 +1,38 @@
 import React from "react";
 import {
   Home,
-  Search,
-  Brain,
-  Clock,
-  MessageCircle,
-  Mic,
-  ShoppingCart,
-  Edit3,
-  LogIn,
-  Star,
   User,
+  BookOpen,
+  Trophy,
+  TrendingUp,
+  Settings,
+  Bell,
+  HelpCircle,
 } from "lucide-react";
 import "./Sidebar.css";
 
-const Sidebar = ({ collapsed = false, onToggleSidebar }) => {
+const Sidebar = ({
+  collapsed = false,
+  onToggleSidebar,
+  activeTab = "home",
+  onTabChange,
+  userSettings = {},
+}) => {
   const navigationItems = [
-    { icon: Home, label: "Dashboard", active: true },
-    { icon: Search, label: "Explore" },
-    { icon: Brain, label: "Problems" },
-    { icon: Clock, label: "Contest" },
-    { icon: MessageCircle, label: "Discuss" },
-    { icon: Mic, label: "Interview" },
-    { icon: ShoppingCart, label: "Store" },
-    { icon: Edit3, label: "Register" },
-    { icon: LogIn, label: "Log in" },
-    { icon: Star, label: "Premium" },
+    { icon: Home, label: "Dashboard", tab: "home" },
+    { icon: BookOpen, label: "My Learning", tab: "explore" },
+    { icon: Trophy, label: "Achievements", tab: "certificates" },
+    { icon: TrendingUp, label: "Progress", tab: "progress" },
+    { icon: Bell, label: "Notifications", tab: "notifications" },
+    { icon: Settings, label: "Settings", tab: "settings" },
+    { icon: HelpCircle, label: "Help & Support", tab: "help" },
   ];
+
+  const handleNavClick = (tab) => {
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
 
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
@@ -37,12 +43,26 @@ const Sidebar = ({ collapsed = false, onToggleSidebar }) => {
         aria-label="Toggle sidebar"
       >
         <div className="profile-picture">
-          <User size={24} />
+          {userSettings.profilePhoto ? (
+            <img
+              src={userSettings.profilePhoto}
+              alt="Profile"
+              className="profile-photo-img"
+            />
+          ) : (
+            <User size={24} />
+          )}
         </div>
         <div className="user-info">
-          <h3 className="user-name">Vaishnavi</h3>
-          <p className="user-details">Roll No: 23CS101</p>
-          <p className="user-details">Section: CSE-A</p>
+          <h3 className="user-name">
+            {userSettings.displayName || "Vaishnavi"}
+          </h3>
+          <p className="user-details">
+            Roll No: {userSettings.rollNo || "23CS101"}
+          </p>
+          <p className="user-details">
+            Section: {userSettings.section || "CSE-A"}
+          </p>
           <p className="user-details">Student | PSIT</p>
         </div>
       </div>
@@ -53,7 +73,15 @@ const Sidebar = ({ collapsed = false, onToggleSidebar }) => {
           return (
             <div
               key={index}
-              className={`nav-item ${item.active ? "active" : ""}`}
+              className={`nav-item ${activeTab === item.tab ? "active" : ""}`}
+              onClick={() => handleNavClick(item.tab)}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  handleNavClick(item.tab);
+                }
+              }}
             >
               <IconComponent size={20} />
               <span className="nav-label">{item.label}</span>
