@@ -188,3 +188,55 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## 🤝 Collaboration & sharing
+
+To collaborate with your team, follow these steps:
+
+1. Create a repository on GitHub/GitLab and add this project as the remote `origin`.
+2. Add collaborators or teams on the remote repository settings (or share your org repo).
+3. Protect the `main` branch (require PRs, require CI checks, require reviews).
+
+Common commands (replace with your repo URL):
+
+```bash
+# initialize git locally (if not already)
+git init
+git add .
+git commit -m "chore: initial commit"
+git remote add origin git@github.com:YOUR_ORG/YOUR_REPO.git
+git branch -M main
+git push -u origin main
+```
+
+After pushing, invite team members using your GitHub/GitLab repo settings. Update `CODEOWNERS` and the `CONTRIBUTING.md` to reflect your team's reviewers and rules.
+
+CI: A GitHub Actions workflow (`.github/workflows/ci.yml`) runs tests on PRs and pushes to `main`.
+
+For more, see `CONTRIBUTING.md` and the `.github` folder.
+
+## Project maintainers
+
+If you need a quick question answered or want to request reviews directly, reach out to any of the maintainers below on GitHub or open an issue and assign one of them:
+
+- @TanuDubey-13 — reviews & UX
+- @TanuGupta2108 — backend & infra
+- @Vaish1004 — frontend & QA
+
+These usernames are listed in `CODEOWNERS` and will be requested automatically for review on PRs that touch repo files.
+
+## Repository status badges
+
+CI / build status (GitHub Actions):
+
+![CI](https://github.com/Initial2005/my-app/actions/workflows/ci.yml/badge.svg)
+
+Vercel deploys: automatic deploys can be configured to run on pushes to `main`. The project includes a GitHub Action workflow that can deploy to Vercel; to enable it you must add the following repository secrets in GitHub:
+
+- `VERCEL_TOKEN` — a Vercel personal token (create in Vercel under Account Settings → Tokens)
+- `VERCEL_ORG_ID` — your Vercel organization ID (available in Vercel project settings)
+- `VERCEL_PROJECT_ID` — your Vercel project ID
+
+Once those secrets are set, pushes to `main` will trigger a deploy.
+
+
