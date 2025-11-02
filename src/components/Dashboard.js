@@ -6,6 +6,8 @@ import Discuss from "./Discuss";
 import Explore from "./Explore";
 import Certificates from "./Certificates";
 import Contest from "./Contest";
+import AdminDashboard from "./AdminDashboard";
+import PSITCoinWallet from "./PSITCoinWallet";
 
 // Settings Section Component
 const SettingsSection = ({ userSettings, onSettingsChange }) => {
@@ -242,6 +244,7 @@ const Dashboard = ({
   onTabChange,
   userSettings = {},
   onSettingsChange,
+  isAdmin = false,
 }) => {
   // Content tabs that should show the top navigation
   const contentTabs = [
@@ -317,10 +320,9 @@ const Dashboard = ({
             </div>
           </div>
 
-          {/* Blockchain History Card */}
-          <div className="blockchain-card">
-            <h3 className="card-title">Blockchain History</h3>
-            <button className="view-transactions-btn">View Transactions</button>
+          {/* PSIT Coin Wallet (embedded) */}
+          <div className="wallet-section">
+            <PSITCoinWallet embedded userSettings={userSettings} />
           </div>
 
           {/* Weekly Progress */}
@@ -336,7 +338,9 @@ const Dashboard = ({
         </>
       )}
 
-      {activeTab === "problems" && <Problems />}
+      {activeTab === "problems" && <Problems userSettings={userSettings} />}
+
+      {activeTab === "admin" && <AdminDashboard />}
 
       {activeTab === "explore" && <Explore />}
 

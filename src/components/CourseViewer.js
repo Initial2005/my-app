@@ -19,7 +19,7 @@ const CourseViewer = ({ course, onClose, onComplete }) => {
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [completedLessons, setCompletedLessons] = useState([]);
   const [quizAnswers, setQuizAnswers] = useState({});
-  const [showQuiz, setShowQuiz] = useState(false);
+  // Note: showQuiz state removed as quiz mode is always available via lesson content
 
   // Sample course content structure
   const courseContent = {
@@ -287,14 +287,12 @@ export default App;`,
   const handleNextLesson = () => {
     if (currentLessonIndex < currentCourse.lessons.length - 1) {
       setCurrentLessonIndex(currentLessonIndex + 1);
-      setShowQuiz(false);
     }
   };
 
   const handlePreviousLesson = () => {
     if (currentLessonIndex > 0) {
       setCurrentLessonIndex(currentLessonIndex - 1);
-      setShowQuiz(false);
     }
   };
 
@@ -326,15 +324,6 @@ export default App;`,
     if (score >= 70) {
       handleMarkComplete();
     }
-  };
-
-  const getQuizScore = () => {
-    if (!currentLesson.questions) return 0;
-    const questions = currentLesson.questions;
-    const correctAnswers = questions.filter(
-      (q) => quizAnswers[q.id] === q.correctAnswer
-    ).length;
-    return (correctAnswers / questions.length) * 100;
   };
 
   if (!currentLesson) {
@@ -408,7 +397,6 @@ export default App;`,
                 } ${completedLessons.includes(lesson.id) ? "completed" : ""}`}
                 onClick={() => {
                   setCurrentLessonIndex(index);
-                  setShowQuiz(false);
                 }}
               >
                 <div className="lesson-item-icon">

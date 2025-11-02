@@ -1,11 +1,51 @@
 import React, { useState } from "react";
 import { Users, TrendingUp, ExternalLink } from "lucide-react";
 import CodeEditor from "./CodeEditor";
+import { getBlockchain } from "../blockchain";
+import Wallet from "../blockchain/Wallet";
 import "./Problems.css";
 
-const Problems = () => {
+const Problems = ({ userSettings }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedProblem, setSelectedProblem] = useState(null);
+  const [blockchain] = useState(() => getBlockchain());
+  const [userWallet] = useState(
+    () =>
+      new Wallet(
+        userSettings?.rollNo || "GUEST",
+        userSettings?.displayName || "Guest User"
+      )
+  );
+
+  const handleProblemSolved = (problem) => {
+    try {
+      // Award coins for completing the problem
+      blockchain.awardCoinsForProblem(
+        userWallet.address,
+        problem.difficulty,
+        problem
+      );
+
+      // Mine the pending transactions
+      blockchain.minePendingTransactions(userWallet.address);
+
+      // Show success message
+      const rewardAmount =
+        blockchain.rewardMapping[problem.difficulty.toLowerCase()] || 10;
+      alert(
+        ` You earned ${rewardAmount} PSIT Coins! 🎉\n\nProblem: ${
+          problem.title
+        }\nDifficulty: ${
+          problem.difficulty
+        }\n\nYour new balance: ${blockchain.getBalanceOfAddress(
+          userWallet.address
+        )} coins`
+      );
+    } catch (error) {
+      console.error("Error awarding coins:", error);
+      alert("Error processing reward. Please try again.");
+    }
+  };
 
   const problems = [
     {
@@ -186,7 +226,14 @@ const Problems = () => {
   return (
     <div className="problems-container">
       <div className="problems-header">
-        <h2 className="problems-title">Coding Problems</h2>
+        <div>
+          <h2 className="problems-title">Coding Problems</h2>
+          <p className="problems-subtitle">
+            Solve problems and earn PSIT Coins!
+          </p>
+        </div>
+      </div>
+      <div className="filters-row">
         <div className="difficulty-filters">
           <button
             className={`filter-btn ${
@@ -284,6 +331,7 @@ const Problems = () => {
         <CodeEditor
           problem={selectedProblem}
           onClose={() => setSelectedProblem(null)}
+          onProblemSolved={() => handleProblemSolved(selectedProblem)}
         />
       )}
     </div>

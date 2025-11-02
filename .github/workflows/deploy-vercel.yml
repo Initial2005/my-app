@@ -4,28 +4,62 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   deploy:
-    name: Deploy to Vercel
+    name: Deploy to Vercel (Production)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Vercel Deploy
-        uses: amondnet/vercel-action@v20
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel Environment
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          vercel pull --yes --environment=production \
+            --token "$VERCEL_TOKEN"
+
+      - name: Build Project (Vercel)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          vercel build --prod \
+            --token "$VERCEL_TOKEN"
+
+      - name: Deploy Project (Vercel)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          vercel deploy --prebuilt --prod \
+            --token "$VERCEL_TOKEN"
 
       - name: Post deployment info
         run: echo "Vercel deploy triggered. Check your Vercel dashboard for status."
 
 # Notes:
-# - Create the repository secrets VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID in GitHub Settings → Secrets.
-# - You can obtain VERCEL_TOKEN from Vercel Account Settings → Tokens.
-# - VERCEL_ORG_ID and VERCEL_PROJECT_ID are available on your Vercel project settings page.
+# - Create repository secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID in GitHub → Settings → Secrets and variables → Actions.
+# - Get VERCEL_TOKEN from Vercel Account Settings → Tokens.
+# - ORG and PROJECT IDs are in your Vercel project settings.

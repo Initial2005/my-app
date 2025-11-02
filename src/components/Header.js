@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Coins, Moon, Sun } from "lucide-react";
+import { Coins, Moon, Sun, ShieldCheck, LogOut } from "lucide-react";
 import "./Header.css";
 
 const mockHistory = [
@@ -13,6 +13,8 @@ const Header = ({
   sidebarCollapsed,
   onToggleTheme,
   theme,
+  isAdmin = false,
+  onLogout,
 }) => {
   const [open, setOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -56,6 +58,12 @@ const Header = ({
       </div>
 
       <div className="header-right">
+        {isAdmin && (
+          <span className="admin-badge" title="Admin account">
+            <ShieldCheck size={16} />
+            <span>Admin</span>
+          </span>
+        )}
         <div
           className="coins-display clickable"
           role="button"
@@ -68,6 +76,18 @@ const Header = ({
           <Coins size={20} />
           <span>PSIT Coins: {totalCoins}</span>
         </div>
+
+        {onLogout && (
+          <button
+            className="logout-button"
+            aria-label="Logout"
+            onClick={onLogout}
+            title="Logout"
+          >
+            <LogOut size={16} />
+            <span className="logout-text">Logout</span>
+          </button>
+        )}
 
         <button
           className="theme-toggle"

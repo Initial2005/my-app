@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Play,
   RotateCcw,
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import "./CodeEditor.css";
 
-const CodeEditor = ({ problem, onClose }) => {
+const CodeEditor = ({ problem, onClose, onProblemSolved }) => {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
   const [testResults, setTestResults] = useState([]);
@@ -26,9 +26,10 @@ const CodeEditor = ({ problem, onClose }) => {
     c: 50, // C
   };
 
-  // Default code templates for different languages
-  const codeTemplates = {
-    javascript: `function twoSum(nums, target) {
+  // Default code templates for different languages (memoized to avoid recreating on every render)
+  const codeTemplates = useMemo(
+    () => ({
+      javascript: `function twoSum(nums, target) {
     const map = new Map();
     for (let i = 0; i < nums.length; i++) {
         const complement = target - nums[i];
@@ -44,7 +45,7 @@ const CodeEditor = ({ problem, onClose }) => {
 const input = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
 const result = twoSum(input.nums, input.target);
 console.log(JSON.stringify(result));`,
-    python: `def twoSum(nums, target):
+      python: `def twoSum(nums, target):
     hashmap = {}
     for i, num in enumerate(nums):
         complement = target - num
@@ -59,7 +60,7 @@ import sys
 input_data = json.loads(sys.stdin.read())
 result = twoSum(input_data['nums'], input_data['target'])
 print(json.dumps(result))`,
-    java: `import java.util.*;
+      java: `import java.util.*;
 import java.io.*;
 
 public class Solution {
@@ -82,7 +83,7 @@ public class Solution {
         System.out.println("[0,1]"); // Simplified for demo
     }
 }`,
-    cpp: `#include <iostream>
+      cpp: `#include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <sstream>
@@ -107,7 +108,7 @@ int main() {
     cout << "[0,1]" << endl;
     return 0;
 }`,
-    c: `#include <stdio.h>
+      c: `#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -135,7 +136,9 @@ int main() {
     printf("[0,1]\\n");
     return 0;
 }`,
-  };
+    }),
+    []
+  ); // Empty dependency array since templates are static
 
   useEffect(() => {
     setCode(codeTemplates[language]);
@@ -290,8 +293,22 @@ int main() {
   };
 
   const submitSolution = () => {
-    // In a real implementation, this would submit to a backend
-    alert("Solution submitted! (This is a demo)");
+    // Check if all tests passed
+    const allTestsPassed =
+      testResults.length > 0 && testResults.every((result) => result.passed);
+
+    if (allTestsPassed) {
+      // Call the onProblemSolved callback to award PSIT Coins
+      if (onProblemSolved) {
+        onProblemSolved();
+      }
+      // Close the editor after successful submission
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } else {
+      alert("Please run and pass all test cases before submitting!");
+    }
   };
 
   return (
