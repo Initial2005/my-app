@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { getBlockchain } from '../blockchain';
-import AchievementManager from '../blockchain/AchievementManager';
-import StreakManager from '../blockchain/StreakManager';
+import React, { useState, useEffect } from "react";
+import { getBlockchain } from "../blockchain";
+import AchievementManager from "../blockchain/AchievementManager";
+import StreakManager from "../blockchain/StreakManager";
 import {
   TrendingUp,
   Award,
@@ -16,14 +16,14 @@ import {
   Clock,
   Calendar,
   ArrowUp,
-} from 'lucide-react';
-import './DashboardHome.css';
+} from "lucide-react";
+import "./DashboardHome.css";
 
 const DashboardHome = ({ userSettings }) => {
   const [blockchain] = useState(() => getBlockchain());
   const [achievementManager] = useState(() => new AchievementManager());
   const [streakManager] = useState(() => new StreakManager());
-  
+
   const [stats, setStats] = useState({
     balance: 0,
     totalProblems: 0,
@@ -45,39 +45,54 @@ const DashboardHome = ({ userSettings }) => {
   }, []);
 
   const loadDashboardData = () => {
-    const userAddress = `user_${userSettings?.rollNo || 'GUEST'}`;
-    
+    const userAddress = `user_${userSettings?.rollNo || "GUEST"}`;
+
     // Get balance
     const balance = blockchain.getBalanceOfAddress(userAddress);
-    
+
     // Get transactions
     const transactions = blockchain.getAllTransactionsForAddress(userAddress);
-    const rewardTxs = transactions.filter(t => t.type === 'reward' || t.type === 'contract_reward' || t.type === 'achievement_reward');
-    
+    const rewardTxs = transactions.filter(
+      (t) =>
+        t.type === "reward" ||
+        t.type === "contract_reward" ||
+        t.type === "achievement_reward"
+    );
+
     // Calculate stats
-    const easyCount = rewardTxs.filter(t => t.metadata?.difficulty === 'easy').length;
-    const mediumCount = rewardTxs.filter(t => t.metadata?.difficulty === 'medium').length;
-    const hardCount = rewardTxs.filter(t => t.metadata?.difficulty === 'hard').length;
-    
+    const easyCount = rewardTxs.filter(
+      (t) => t.metadata?.difficulty === "easy"
+    ).length;
+    const mediumCount = rewardTxs.filter(
+      (t) => t.metadata?.difficulty === "medium"
+    ).length;
+    const hardCount = rewardTxs.filter(
+      (t) => t.metadata?.difficulty === "hard"
+    ).length;
+
     const totalEarned = rewardTxs.reduce((sum, tx) => sum + tx.amount, 0);
-    
+
     // Get achievements
-    const userAchievements = achievementManager.getUserAchievements(userAddress);
-    
+    const userAchievements =
+      achievementManager.getUserAchievements(userAddress);
+
     // Get streak
     const streakData = streakManager.getUserStreak(userAddress);
-    
+
     // Get recent activity (last 5 transactions)
-    const recent = transactions.slice(-5).reverse().map(tx => ({
-      type: tx.type,
-      amount: tx.amount,
-      timestamp: tx.timestamp,
-      metadata: tx.metadata,
-    }));
-    
+    const recent = transactions
+      .slice(-5)
+      .reverse()
+      .map((tx) => ({
+        type: tx.type,
+        amount: tx.amount,
+        timestamp: tx.timestamp,
+        metadata: tx.metadata,
+      }));
+
     // Generate weekly data (mock for now)
     const weekly = generateWeeklyData(transactions);
-    
+
     setStats({
       balance,
       totalProblems: easyCount + mediumCount + hardCount,
@@ -89,30 +104,30 @@ const DashboardHome = ({ userSettings }) => {
       rank: calculateRank(balance),
       totalEarned,
     });
-    
+
     setRecentActivity(recent);
     setWeeklyData(weekly);
   };
 
   const generateWeeklyData = (transactions) => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const today = new Date().getDay();
     const weekData = [];
-    
+
     for (let i = 0; i < 7; i++) {
       const dayIndex = (today - 6 + i + 7) % 7;
-      const dayTxs = transactions.filter(tx => {
+      const dayTxs = transactions.filter((tx) => {
         const txDate = new Date(tx.timestamp);
         return txDate.getDay() === dayIndex;
       });
-      
+
       weekData.push({
         day: days[dayIndex],
         count: dayTxs.length,
         coins: dayTxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
       });
     }
-    
+
     return weekData;
   };
 
@@ -126,29 +141,37 @@ const DashboardHome = ({ userSettings }) => {
 
   const getActivityIcon = (type) => {
     switch (type) {
-      case 'reward': return <Code size={16} className="activity-icon reward" />;
-      case 'contract_reward': return <Zap size={16} className="activity-icon bonus" />;
-      case 'achievement_reward': return <Trophy size={16} className="activity-icon achievement" />;
-      case 'purchase': return <Coins size={16} className="activity-icon purchase" />;
-      case 'daily_bonus': return <Calendar size={16} className="activity-icon daily" />;
-      default: return <Star size={16} className="activity-icon" />;
+      case "reward":
+        return <Code size={16} className="activity-icon reward" />;
+      case "contract_reward":
+        return <Zap size={16} className="activity-icon bonus" />;
+      case "achievement_reward":
+        return <Trophy size={16} className="activity-icon achievement" />;
+      case "purchase":
+        return <Coins size={16} className="activity-icon purchase" />;
+      case "daily_bonus":
+        return <Calendar size={16} className="activity-icon daily" />;
+      default:
+        return <Star size={16} className="activity-icon" />;
     }
   };
 
   const getActivityLabel = (activity) => {
     switch (activity.type) {
-      case 'reward':
-        return `Solved ${activity.metadata?.difficulty || ''} problem`;
-      case 'contract_reward':
-        return 'Smart contract bonus';
-      case 'achievement_reward':
-        return `Achievement: ${activity.metadata?.achievementName || 'Unlocked'}`;
-      case 'purchase':
-        return `Purchased: ${activity.metadata?.itemName || 'Item'}`;
-      case 'daily_bonus':
-        return 'Daily login bonus';
+      case "reward":
+        return `Solved ${activity.metadata?.difficulty || ""} problem`;
+      case "contract_reward":
+        return "Smart contract bonus";
+      case "achievement_reward":
+        return `Achievement: ${
+          activity.metadata?.achievementName || "Unlocked"
+        }`;
+      case "purchase":
+        return `Purchased: ${activity.metadata?.itemName || "Item"}`;
+      case "daily_bonus":
+        return "Daily login bonus";
       default:
-        return 'Activity';
+        return "Activity";
     }
   };
 
@@ -158,19 +181,21 @@ const DashboardHome = ({ userSettings }) => {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
-    if (minutes < 1) return 'Just now';
+
+    if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
   };
 
-  const canClaimDaily = streakManager.canClaimDailyBonus(`user_${userSettings?.rollNo || 'GUEST'}`);
+  const canClaimDaily = streakManager.canClaimDailyBonus(
+    `user_${userSettings?.rollNo || "GUEST"}`
+  );
 
   const handleClaimDaily = () => {
-    const userAddress = `user_${userSettings?.rollNo || 'GUEST'}`;
+    const userAddress = `user_${userSettings?.rollNo || "GUEST"}`;
     const result = streakManager.claimDailyBonus(userAddress, blockchain);
-    
+
     if (result.claimed) {
       blockchain.minePendingTransactions(userAddress);
       alert(`✅ ${result.message}\n+${result.amount} PSIT Coins!`);
@@ -180,7 +205,7 @@ const DashboardHome = ({ userSettings }) => {
     }
   };
 
-  const maxWeeklyCount = Math.max(...weeklyData.map(d => d.count), 1);
+  const maxWeeklyCount = Math.max(...weeklyData.map((d) => d.count), 1);
 
   return (
     <div className="dashboard-home">
@@ -188,7 +213,7 @@ const DashboardHome = ({ userSettings }) => {
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">
-            Welcome back, {userSettings?.displayName || 'Student'}! 👋
+            Welcome back, {userSettings?.displayName || "Student"}! 👋
           </h1>
           <p className="hero-subtitle">
             Ready to continue your learning journey?
@@ -212,8 +237,7 @@ const DashboardHome = ({ userSettings }) => {
             <h3 className="stat-label">PSIT Coins</h3>
             <p className="stat-value">{stats.balance}</p>
             <span className="stat-change positive">
-              <ArrowUp size={14} />
-              +{stats.totalEarned} all time
+              <ArrowUp size={14} />+{stats.totalEarned} all time
             </span>
           </div>
         </div>
@@ -241,7 +265,7 @@ const DashboardHome = ({ userSettings }) => {
             <h3 className="stat-label">Current Streak</h3>
             <p className="stat-value">{stats.streak} days</p>
             <span className="stat-info">
-              {stats.streak >= 7 ? '🔥 On fire!' : 'Keep it going!'}
+              {stats.streak >= 7 ? "🔥 On fire!" : "Keep it going!"}
             </span>
           </div>
         </div>
@@ -277,11 +301,17 @@ const DashboardHome = ({ userSettings }) => {
           </div>
           <div className="stat-content">
             <h3 className="stat-label">Weekly Goal</h3>
-            <p className="stat-value">{weeklyData.reduce((sum, d) => sum + d.count, 0)}/20</p>
+            <p className="stat-value">
+              {weeklyData.reduce((sum, d) => sum + d.count, 0)}/20
+            </p>
             <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${(weeklyData.reduce((sum, d) => sum + d.count, 0) / 20) * 100}%` }}
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${
+                    (weeklyData.reduce((sum, d) => sum + d.count, 0) / 20) * 100
+                  }%`,
+                }}
               ></div>
             </div>
           </div>
@@ -297,14 +327,17 @@ const DashboardHome = ({ userSettings }) => {
               <TrendingUp size={20} />
               Weekly Activity
             </h3>
-            <span className="card-info">{weeklyData.reduce((sum, d) => d.count + sum, 0)} problems this week</span>
+            <span className="card-info">
+              {weeklyData.reduce((sum, d) => d.count + sum, 0)} problems this
+              week
+            </span>
           </div>
           <div className="chart-container">
             {weeklyData.map((day, idx) => (
               <div key={idx} className="chart-bar-wrapper">
                 <div className="chart-bar-container">
-                  <div 
-                    className="chart-bar" 
+                  <div
+                    className="chart-bar"
                     style={{ height: `${(day.count / maxWeeklyCount) * 100}%` }}
                     title={`${day.count} problems, ${day.coins} coins`}
                   >
@@ -332,11 +365,20 @@ const DashboardHome = ({ userSettings }) => {
                 <div key={idx} className="activity-item">
                   {getActivityIcon(activity.type)}
                   <div className="activity-details">
-                    <p className="activity-label">{getActivityLabel(activity)}</p>
-                    <span className="activity-time">{formatTime(activity.timestamp)}</span>
+                    <p className="activity-label">
+                      {getActivityLabel(activity)}
+                    </p>
+                    <span className="activity-time">
+                      {formatTime(activity.timestamp)}
+                    </span>
                   </div>
-                  <span className={`activity-amount ${activity.amount > 0 ? 'positive' : 'negative'}`}>
-                    {activity.amount > 0 ? '+' : ''}{activity.amount}
+                  <span
+                    className={`activity-amount ${
+                      activity.amount > 0 ? "positive" : "negative"
+                    }`}
+                  >
+                    {activity.amount > 0 ? "+" : ""}
+                    {activity.amount}
                   </span>
                 </div>
               ))

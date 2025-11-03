@@ -153,7 +153,9 @@ int main() {
     // Prevent copy-paste in the code editor
     const handleCopyPaste = (e) => {
       e.preventDefault();
-      setWarningMessage("⚠️ Copy-paste is disabled during the coding challenge!");
+      setWarningMessage(
+        "⚠️ Copy-paste is disabled during the coding challenge!"
+      );
       setShowWarning(true);
       setTimeout(() => setShowWarning(false), 3000);
     };
@@ -161,14 +163,20 @@ int main() {
     // Detect tab switching
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setTabSwitchCount(prev => {
+        setTabSwitchCount((prev) => {
           const newCount = prev + 1;
           if (newCount === 1) {
-            setWarningMessage("⚠️ Warning: Tab switching detected! Please stay on this page.");
+            setWarningMessage(
+              "⚠️ Warning: Tab switching detected! Please stay on this page."
+            );
           } else if (newCount === 2) {
-            setWarningMessage("⚠️ Second warning: Tab switching may result in submission restrictions.");
+            setWarningMessage(
+              "⚠️ Second warning: Tab switching may result in submission restrictions."
+            );
           } else if (newCount >= 3) {
-            setWarningMessage("⚠️ Final warning: Multiple tab switches detected. Your submission may be flagged.");
+            setWarningMessage(
+              "⚠️ Final warning: Multiple tab switches detected. Your submission may be flagged."
+            );
           }
           setShowWarning(true);
           setTimeout(() => setShowWarning(false), 4000);
@@ -186,19 +194,19 @@ int main() {
     };
 
     // Add event listeners
-    document.addEventListener('copy', handleCopyPaste);
-    document.addEventListener('cut', handleCopyPaste);
-    document.addEventListener('paste', handleCopyPaste);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener("copy", handleCopyPaste);
+    document.addEventListener("cut", handleCopyPaste);
+    document.addEventListener("paste", handleCopyPaste);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("contextmenu", handleContextMenu);
 
     // Cleanup
     return () => {
-      document.removeEventListener('copy', handleCopyPaste);
-      document.removeEventListener('cut', handleCopyPaste);
-      document.removeEventListener('paste', handleCopyPaste);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener("copy", handleCopyPaste);
+      document.removeEventListener("cut", handleCopyPaste);
+      document.removeEventListener("paste", handleCopyPaste);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("contextmenu", handleContextMenu);
     };
   }, []);
 
@@ -372,11 +380,9 @@ int main() {
     <div className="code-editor-modal">
       <div className="code-editor-container">
         {showWarning && (
-          <div className="anti-cheat-warning">
-            {warningMessage}
-          </div>
+          <div className="anti-cheat-warning">{warningMessage}</div>
         )}
-        
+
         <div className="editor-header">
           <div className="problem-info">
             <h3>{problem.title}</h3>
@@ -388,7 +394,10 @@ int main() {
               </span>
               <span className="platform">{problem.platform}</span>
               {tabSwitchCount > 0 && (
-                <span className="tab-switch-badge" title="Tab switches detected">
+                <span
+                  className="tab-switch-badge"
+                  title="Tab switches detected"
+                >
                   ⚠️ {tabSwitchCount}
                 </span>
               )}
