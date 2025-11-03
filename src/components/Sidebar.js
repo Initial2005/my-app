@@ -8,6 +8,7 @@ import {
   Settings,
   Bell,
   HelpCircle,
+  ShoppingBag,
 } from "lucide-react";
 import "./Sidebar.css";
 
@@ -21,6 +22,7 @@ const Sidebar = ({
   const navigationItems = [
     { icon: Home, label: "Dashboard", tab: "home" },
     { icon: BookOpen, label: "My Learning", tab: "explore" },
+    { icon: ShoppingBag, label: "Marketplace", tab: "marketplace" },
     { icon: Trophy, label: "Achievements", tab: "certificates" },
     { icon: TrendingUp, label: "Progress", tab: "progress" },
     { icon: Bell, label: "Notifications", tab: "notifications" },

@@ -8,6 +8,7 @@ import Certificates from "./Certificates";
 import Contest from "./Contest";
 import AdminDashboard from "./AdminDashboard";
 import PSITCoinWallet from "./PSITCoinWallet";
+import Marketplace from "./Marketplace";
 
 // Settings Section Component
 const SettingsSection = ({ userSettings, onSettingsChange }) => {
@@ -452,6 +453,8 @@ const Dashboard = ({
           onSettingsChange={onSettingsChange}
         />
       )}
+
+      {activeTab === "marketplace" && <Marketplace />}
 
       {activeTab === "help" && (
         <div className="help-section">
