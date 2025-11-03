@@ -1,4 +1,5 @@
 // Achievement System - NFT-style badges on blockchain
+import Transaction from "./Transaction";
 
 export const ACHIEVEMENTS = {
   // Problem-solving achievements
@@ -196,7 +197,10 @@ export class AchievementManager {
   }
 
   getUserStats(userAddress, blockchain) {
-    const transactions = blockchain.getAllTransactionsForAddress(userAddress);
+    const transactions =
+      typeof blockchain.getTransactionsForAddress === "function"
+        ? blockchain.getTransactionsForAddress(userAddress)
+        : [];
     const rewardTxs = transactions.filter((t) => t.type === "reward");
 
     return {
@@ -231,31 +235,38 @@ export class AchievementManager {
 
       // Award coins for achievement
       const achievement = this.achievements[achievementId];
-      if (achievement && achievement.reward) {
-        blockchain.createTransaction({
-          fromAddress: null,
-          toAddress: userAddress,
-          amount: achievement.reward,
-          type: "achievement_reward",
-          metadata: {
+      try {
+        if (achievement && achievement.reward) {
+          const rewardTx = new Transaction(
+            null,
+            userAddress,
+            achievement.reward,
+            "achievement_reward",
+            {
+              achievementId,
+              achievementName: achievement.name,
+            }
+          );
+          blockchain.addTransaction(rewardTx);
+        }
+
+        // Log achievement unlock on blockchain (0-amount)
+        const logTx = new Transaction(
+          "system",
+          userAddress,
+          0,
+          "achievement_unlock",
+          {
             achievementId,
             achievementName: achievement.name,
-          },
-        });
+            timestamp: Date.now(),
+          }
+        );
+        blockchain.addTransaction(logTx);
+      } catch (e) {
+        // Non-fatal: still keep local unlock, dashboard will reflect on next mine
+        console.warn("Failed to write achievement tx to blockchain:", e);
       }
-
-      // Store achievement on blockchain
-      blockchain.createTransaction({
-        fromAddress: "system",
-        toAddress: userAddress,
-        amount: 0,
-        type: "achievement_unlock",
-        metadata: {
-          achievementId,
-          achievementName: achievement.name,
-          timestamp: Date.now(),
-        },
-      });
     }
   }
 

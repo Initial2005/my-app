@@ -1,4 +1,5 @@
 // Streak Management System
+import Transaction from "./Transaction";
 
 export class StreakManager {
   constructor() {
@@ -49,15 +50,18 @@ export class StreakManager {
     }
 
     // Award 5 coins for daily login
-    blockchain.createTransaction({
-      fromAddress: null,
-      toAddress: userAddress,
-      amount: 5,
-      type: "daily_bonus",
-      metadata: {
-        date: today,
-      },
-    });
+    try {
+      const bonusTx = new Transaction(
+        null,
+        userAddress,
+        5,
+        "daily_bonus",
+        { date: today }
+      );
+      blockchain.addTransaction(bonusTx);
+    } catch (e) {
+      console.warn("Failed to record daily bonus tx:", e);
+    }
 
     dailyLogins[userAddress] = today;
     localStorage.setItem("dailyLogins", JSON.stringify(dailyLogins));

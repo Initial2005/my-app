@@ -1,5 +1,6 @@
 // Smart Contract System for PSIT Coin Blockchain
 // Enables automated rules, conditional logic, and programmable rewards
+import Transaction from "./Transaction";
 
 class SmartContract {
   constructor(contractId, name, creator) {
@@ -97,17 +98,22 @@ class SmartContract {
       switch (action.type) {
         case "reward":
           const rewardAmount = this.calculateReward(action.amount, event);
-          blockchain.createTransaction({
-            fromAddress: null,
-            toAddress: userAddress,
-            amount: rewardAmount,
-            type: "contract_reward",
-            metadata: {
-              contractId: this.contractId,
-              originalAmount: action.amount,
-              bonusAmount: rewardAmount - action.amount,
-            },
-          });
+          try {
+            const rewardTx = new Transaction(
+              null,
+              userAddress,
+              rewardAmount,
+              "contract_reward",
+              {
+                contractId: this.contractId,
+                originalAmount: action.amount,
+                bonusAmount: rewardAmount - action.amount,
+              }
+            );
+            blockchain.addTransaction(rewardTx);
+          } catch (e) {
+            console.warn("Failed to record contract reward:", e);
+          }
           results.push({ type: "reward", amount: rewardAmount });
           break;
 
@@ -155,7 +161,10 @@ class SmartContract {
 
   // Helper methods
   getUserProblemCount(blockchain, userAddress) {
-    const transactions = blockchain.getAllTransactionsForAddress(userAddress);
+    const transactions =
+      typeof blockchain.getTransactionsForAddress === "function"
+        ? blockchain.getTransactionsForAddress(userAddress)
+        : [];
     return transactions.filter((t) => t.type === "reward").length;
   }
 

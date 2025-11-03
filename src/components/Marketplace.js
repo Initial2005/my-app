@@ -9,6 +9,7 @@ import {
   Lock,
 } from "lucide-react";
 import { getBlockchain } from "../blockchain";
+import Transaction from "../blockchain/Transaction";
 import "./Marketplace.css";
 
 const MARKETPLACE_ITEMS = [
@@ -130,16 +131,19 @@ const Marketplace = () => {
     if (!selectedItem) return;
 
     // Create spend transaction
-    blockchain.createTransaction({
-      fromAddress: userAddress,
-      toAddress: "marketplace",
-      amount: selectedItem.price,
-      type: "purchase",
-      metadata: {
-        itemId: selectedItem.id,
-        itemName: selectedItem.name,
-      },
-    });
+      try {
+        const purchaseTx = new Transaction(
+          userAddress,
+          "marketplace",
+          selectedItem.price,
+          "purchase",
+          { itemId: selectedItem.id, itemName: selectedItem.name }
+        );
+        // For purchases, signTransaction is optional in our simplified model
+        blockchain.addTransaction(purchaseTx);
+      } catch (e) {
+        console.warn("Failed to create purchase transaction:", e);
+      }
 
     // Mine the transaction
     blockchain.minePendingTransactions(userAddress);

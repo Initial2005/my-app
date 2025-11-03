@@ -61,7 +61,10 @@ const DashboardHome = ({ userSettings }) => {
     const balance = blockchain.getBalanceOfAddress(userAddress);
 
     // Get transactions
-    const transactions = blockchain.getAllTransactionsForAddress(userAddress);
+    const transactions =
+      typeof blockchain.getTransactionsForAddress === "function"
+        ? blockchain.getTransactionsForAddress(userAddress)
+        : [];
     const rewardTxs = transactions.filter(
       (t) =>
         t.type === "reward" ||
@@ -96,7 +99,13 @@ const DashboardHome = ({ userSettings }) => {
       .map((tx) => ({
         type: tx.type,
         amount: tx.amount,
-        timestamp: tx.timestamp,
+        // Prefer numeric block timestamp if available; else parse string timestamp
+        timestamp:
+          typeof tx.blockTimestamp === "number"
+            ? tx.blockTimestamp
+            : typeof tx.timestamp === "number"
+            ? tx.timestamp
+            : Date.parse(tx.timestamp),
         metadata: tx.metadata,
       }));
 
@@ -127,7 +136,13 @@ const DashboardHome = ({ userSettings }) => {
     for (let i = 0; i < 7; i++) {
       const dayIndex = (today - 6 + i + 7) % 7;
       const dayTxs = transactions.filter((tx) => {
-        const txDate = new Date(tx.timestamp);
+        const ts =
+          typeof tx.blockTimestamp === "number"
+            ? tx.blockTimestamp
+            : typeof tx.timestamp === "number"
+            ? tx.timestamp
+            : Date.parse(tx.timestamp);
+        const txDate = new Date(ts);
         return txDate.getDay() === dayIndex;
       });
 
