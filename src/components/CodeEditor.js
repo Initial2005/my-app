@@ -16,6 +16,9 @@ const CodeEditor = ({ problem, onClose, onProblemSolved }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [executionTime, setExecutionTime] = useState(0);
   const [compilationError, setCompilationError] = useState("");
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("");
 
   // Language mapping for Judge0 API
   const languageIds = {
@@ -144,6 +147,60 @@ int main() {
     setCode(codeTemplates[language]);
     setCompilationError("");
   }, [language, codeTemplates]);
+
+  // Anti-cheating measures
+  useEffect(() => {
+    // Prevent copy-paste in the code editor
+    const handleCopyPaste = (e) => {
+      e.preventDefault();
+      setWarningMessage("⚠️ Copy-paste is disabled during the coding challenge!");
+      setShowWarning(true);
+      setTimeout(() => setShowWarning(false), 3000);
+    };
+
+    // Detect tab switching
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setTabSwitchCount(prev => {
+          const newCount = prev + 1;
+          if (newCount === 1) {
+            setWarningMessage("⚠️ Warning: Tab switching detected! Please stay on this page.");
+          } else if (newCount === 2) {
+            setWarningMessage("⚠️ Second warning: Tab switching may result in submission restrictions.");
+          } else if (newCount >= 3) {
+            setWarningMessage("⚠️ Final warning: Multiple tab switches detected. Your submission may be flagged.");
+          }
+          setShowWarning(true);
+          setTimeout(() => setShowWarning(false), 4000);
+          return newCount;
+        });
+      }
+    };
+
+    // Prevent right-click context menu
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      setWarningMessage("⚠️ Right-click is disabled during the challenge!");
+      setShowWarning(true);
+      setTimeout(() => setShowWarning(false), 3000);
+    };
+
+    // Add event listeners
+    document.addEventListener('copy', handleCopyPaste);
+    document.addEventListener('cut', handleCopyPaste);
+    document.addEventListener('paste', handleCopyPaste);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('copy', handleCopyPaste);
+      document.removeEventListener('cut', handleCopyPaste);
+      document.removeEventListener('paste', handleCopyPaste);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []);
 
   const testCases = [
     {
@@ -314,6 +371,12 @@ int main() {
   return (
     <div className="code-editor-modal">
       <div className="code-editor-container">
+        {showWarning && (
+          <div className="anti-cheat-warning">
+            {warningMessage}
+          </div>
+        )}
+        
         <div className="editor-header">
           <div className="problem-info">
             <h3>{problem.title}</h3>
@@ -324,6 +387,11 @@ int main() {
                 {problem.difficulty}
               </span>
               <span className="platform">{problem.platform}</span>
+              {tabSwitchCount > 0 && (
+                <span className="tab-switch-badge" title="Tab switches detected">
+                  ⚠️ {tabSwitchCount}
+                </span>
+              )}
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
@@ -388,6 +456,10 @@ int main() {
               onChange={(e) => setCode(e.target.value)}
               placeholder="Write your solution here..."
               spellCheck={false}
+              onCopy={(e) => e.preventDefault()}
+              onCut={(e) => e.preventDefault()}
+              onPaste={(e) => e.preventDefault()}
+              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
 
