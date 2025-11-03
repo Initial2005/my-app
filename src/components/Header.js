@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Coins, Moon, Sun, ShieldCheck, LogOut } from "lucide-react";
+import {
+  Coins,
+  Moon,
+  Sun,
+  ShieldCheck,
+  LogOut,
+  Copy,
+  RefreshCw,
+} from "lucide-react";
+import { getBlockchain } from "../blockchain";
+import Wallet from "../blockchain/Wallet";
 import "./Header.css";
-
-const mockHistory = [
-  { id: 1, date: "2025-10-20", change: +50, reason: "Quiz reward" },
-  { id: 2, date: "2025-10-18", change: -30, reason: "Submission fee" },
-  { id: 3, date: "2025-10-15", change: +100, reason: "Referral bonus" },
-];
 
 const Header = ({
   onToggleSidebar,
@@ -15,10 +19,72 @@ const Header = ({
   theme,
   isAdmin = false,
   onLogout,
+  userSettings,
 }) => {
   const [open, setOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [blockchain] = useState(() => getBlockchain());
+  const [wallet, setWallet] = useState(null);
+  const [balance, setBalance] = useState(0);
+  const [recentActivity, setRecentActivity] = useState([]);
   const panelRef = useRef(null);
+
+  useEffect(() => {
+    const auth = JSON.parse(localStorage.getItem("auth") || "{}");
+    if (auth.userId) {
+      const w = new Wallet(auth.userId, userSettings?.displayName || "Student");
+      setWallet(w);
+      const bal = blockchain.getBalanceOfAddress(w.address);
+      setBalance(bal);
+      const transactions = blockchain.getTransactionsForAddress(w.address);
+      const recent = transactions.slice(-5).reverse().map((tx) => ({
+        id: tx.hash || Math.random(),
+        date: new Date(tx.blockTimestamp || tx.timestamp || Date.now()).toLocaleDateString(),
+        change: tx.toAddress === w.address ? tx.amount : -tx.amount,
+        reason: tx.type === "reward" ? "Problem solved" : 
+                tx.type === "achievement_reward" ? "Achievement" :
+                tx.type === "contract_reward" ? "Bonus reward" :
+                tx.type === "daily_bonus" ? "Daily bonus" :
+                tx.type === "purchase" ? "Marketplace purchase" : "Transaction",
+      }));
+      setRecentActivity(recent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userSettings]);
+
+  const updateBalance = (address) => {
+    if (!address) return;
+    const bal = blockchain.getBalanceOfAddress(address);
+    setBalance(bal);
+  };
+
+  const loadRecentActivity = (address) => {
+    if (!address) return;
+    const transactions = blockchain.getTransactionsForAddress(address);
+    const recent = transactions
+      .slice(-5)
+      .reverse()
+      .map((tx) => ({
+        id: tx.hash || Math.random(),
+        date: new Date(
+          tx.blockTimestamp || tx.timestamp || Date.now()
+        ).toLocaleDateString(),
+        change: tx.toAddress === address ? tx.amount : -tx.amount,
+        reason:
+          tx.type === "reward"
+            ? "Problem solved"
+            : tx.type === "achievement_reward"
+            ? "Achievement"
+            : tx.type === "contract_reward"
+            ? "Bonus reward"
+            : tx.type === "daily_bonus"
+            ? "Daily bonus"
+            : tx.type === "purchase"
+            ? "Marketplace purchase"
+            : "Transaction",
+      }));
+    setRecentActivity(recent);
+  };
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -38,7 +104,7 @@ const Header = ({
     setTimeout(() => {
       setOpen(false);
       setIsClosing(false);
-    }, 300); // match animation duration (increased to 300ms for spring effect)
+    }, 300);
   };
 
   const handleToggle = () => {
@@ -46,10 +112,36 @@ const Header = ({
       handleClose();
     } else {
       setOpen(true);
+      if (wallet) {
+        updateBalance(wallet.address);
+        loadRecentActivity(wallet.address);
+      }
     }
   };
 
-  const totalCoins = 120; // keep as-is for now; could be passed in via props later
+  const copyAddress = async () => {
+    if (!wallet) return;
+    try {
+      await navigator.clipboard.writeText(wallet.address);
+      alert("Wallet address copied to clipboard!");
+    } catch (e) {
+      console.warn("Copy failed", e);
+    }
+  };
+
+  const refreshBalance = () => {
+    if (!wallet) return;
+    updateBalance(wallet.address);
+    loadRecentActivity(wallet.address);
+  };
+
+  const minePending = () => {
+    if (!wallet) return;
+    blockchain.minePendingTransactions(wallet.address);
+    updateBalance(wallet.address);
+    loadRecentActivity(wallet.address);
+    alert("✅ Pending transactions mined!");
+  };
 
   return (
     <div className="header">
@@ -65,16 +157,17 @@ const Header = ({
           </span>
         )}
         <div
-          className="coins-display clickable"
+          className="wallet-display clickable"
           role="button"
           tabIndex={0}
           onClick={handleToggle}
           onKeyDown={(e) => e.key === "Enter" && handleToggle()}
           aria-expanded={open}
-          aria-controls="coins-panel"
+          aria-controls="wallet-panel"
         >
           <Coins size={20} />
-          <span>PSIT Coins: {totalCoins}</span>
+          <span className="wallet-label">PSIT Wallet</span>
+          <span className="wallet-balance-badge">{balance}</span>
         </div>
 
         {onLogout && (
@@ -101,40 +194,57 @@ const Header = ({
         </button>
       </div>
 
-      {open && (
+      {open && wallet && (
         <div
-          className={`coins-panel ${isClosing ? "closing" : ""}`}
-          id="coins-panel"
+          className={`wallet-panel ${isClosing ? "closing" : ""}`}
+          id="wallet-panel"
           ref={panelRef}
         >
-          <div className="coins-panel-header">
-            <strong>PSIT Coins</strong>
-            <span className="coins-balance">{totalCoins} pts</span>
+          <div className="wallet-panel-header">
+            <div className="wallet-header-top">
+              <strong>PSIT Wallet</strong>
+              <span className="wallet-balance-large">{balance} PSIT</span>
+            </div>
+            <div className="wallet-address-row">
+              <span className="wallet-address-label">Address:</span>
+              <code className="wallet-address-code" title={wallet.address}>
+                {wallet.address.substring(0, 16)}...{wallet.address.substring(wallet.address.length - 8)}
+              </code>
+            </div>
           </div>
 
-          <div className="coins-section">
-            <h4>About</h4>
-            <p className="muted">
-              PSIT Coins are earned by completing activities on BrainChainPSIT.
-              They can be used to unlock challenges, pay submission fees, or
-              redeemed for perks.
-            </p>
+          <div className="wallet-actions-row">
+            <button className="wallet-action-btn" onClick={copyAddress}>
+              <Copy size={14} />
+              Copy
+            </button>
+            <button className="wallet-action-btn" onClick={refreshBalance}>
+              <RefreshCw size={14} />
+              Refresh
+            </button>
+            <button className="wallet-action-btn primary" onClick={minePending}>
+              Mine Pending
+            </button>
           </div>
 
-          <div className="coins-section">
-            <h4>Recent activity</h4>
-            <ul className="coins-history">
-              {mockHistory.map((h) => (
-                <li key={h.id} className="history-item">
-                  <span className="history-date">{h.date}</span>
-                  <span
-                    className={`history-change ${h.change > 0 ? "pos" : "neg"}`}
-                  >
-                    {h.change > 0 ? `+${h.change}` : h.change}
-                  </span>
-                  <span className="history-reason">{h.reason}</span>
-                </li>
-              ))}
+          <div className="wallet-section">
+            <h4>Recent Activity</h4>
+            <ul className="wallet-history">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((h) => (
+                  <li key={h.id} className="history-item">
+                    <span className="history-date">{h.date}</span>
+                    <span
+                      className={`history-change ${h.change > 0 ? "pos" : "neg"}`}
+                    >
+                      {h.change > 0 ? `+${h.change}` : h.change}
+                    </span>
+                    <span className="history-reason">{h.reason}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="empty-history">No recent activity</li>
+              )}
             </ul>
           </div>
         </div>

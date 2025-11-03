@@ -121,6 +121,7 @@ function App() {
           sidebarCollapsed={isSidebarCollapsed}
           isAdmin={isAdmin}
           onLogout={handleLogout}
+          userSettings={userSettings}
         />
         <Dashboard
           activeTab={activeTab}
