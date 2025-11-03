@@ -24,6 +24,9 @@ const DashboardHome = ({ userSettings }) => {
   const [achievementManager] = useState(() => new AchievementManager());
   const [streakManager] = useState(() => new StreakManager());
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [stats, setStats] = useState({
     balance: 0,
     totalProblems: 0,
@@ -40,7 +43,14 @@ const DashboardHome = ({ userSettings }) => {
   const [weeklyData, setWeeklyData] = useState([]);
 
   useEffect(() => {
-    loadDashboardData();
+    try {
+      loadDashboardData();
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error loading dashboard:", err);
+      setError(err.message);
+      setIsLoading(false);
+    }
     // eslint-disable-next-line
   }, []);
 
@@ -206,6 +216,29 @@ const DashboardHome = ({ userSettings }) => {
   };
 
   const maxWeeklyCount = Math.max(...weeklyData.map((d) => d.count), 1);
+
+  if (isLoading) {
+    return (
+      <div className="dashboard-home">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-home">
+        <div className="error-state">
+          <h2>⚠️ Error Loading Dashboard</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Reload Page</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-home">
