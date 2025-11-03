@@ -51,13 +51,9 @@ export class StreakManager {
 
     // Award 5 coins for daily login
     try {
-      const bonusTx = new Transaction(
-        null,
-        userAddress,
-        5,
-        "daily_bonus",
-        { date: today }
-      );
+      const bonusTx = new Transaction(null, userAddress, 5, "daily_bonus", {
+        date: today,
+      });
       blockchain.addTransaction(bonusTx);
     } catch (e) {
       console.warn("Failed to record daily bonus tx:", e);
