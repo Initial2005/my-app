@@ -5,6 +5,87 @@
   margin: 0 auto;
 }
 
+/* Wallet Bar (above navbar) */
+.wallet-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: #e5e7eb;
+}
+
+.wallet-left {
+  min-width: 0;
+}
+
+.wallet-label {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.wallet-address {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+  max-width: 60ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wallet-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.wallet-balance {
+  text-align: right;
+}
+
+.wallet-balance-label {
+  display: block;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.wallet-balance-amount {
+  display: block;
+  font-weight: 700;
+  font-size: 20px;
+  color: #a78bfa;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.wallet-action {
+  padding: 8px 12px;
+  background: #374151;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.wallet-action:hover {
+  transform: translateY(-1px);
+}
+
+.wallet-action.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
 .marketplace-header {
   display: flex;
   justify-content: space-between;
@@ -308,6 +389,16 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .wallet-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .wallet-right {
+    justify-content: space-between;
+  }
+
   .marketplace-header {
     flex-direction: column;
     text-align: center;

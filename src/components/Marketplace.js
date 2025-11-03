@@ -9,6 +9,7 @@ import {
   Lock,
 } from "lucide-react";
 import { getBlockchain } from "../blockchain";
+import Wallet from "../blockchain/Wallet";
 import Transaction from "../blockchain/Transaction";
 import "./Marketplace.css";
 
@@ -100,8 +101,10 @@ const Marketplace = () => {
 
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("auth") || "{}");
+    const settings = JSON.parse(localStorage.getItem("userSettings") || "{}");
     if (auth.userId) {
-      const address = `user_${auth.userId}`;
+      const w = new Wallet(auth.userId, settings?.displayName || "Student");
+      const address = w.address;
       setUserAddress(address);
       const bal = blockchain.getBalanceOfAddress(address);
       setBalance(bal);
@@ -115,6 +118,21 @@ const Marketplace = () => {
   const updateBalance = (address) => {
     const bal = blockchain.getBalanceOfAddress(address);
     setBalance(bal);
+  };
+
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(userAddress);
+      alert("Wallet address copied to clipboard");
+    } catch (e) {
+      console.warn("Copy failed", e);
+    }
+  };
+
+  const mineNow = () => {
+    if (!userAddress) return;
+    blockchain.minePendingTransactions(userAddress);
+    updateBalance(userAddress);
   };
 
   const handlePurchase = (item) => {
@@ -131,19 +149,19 @@ const Marketplace = () => {
     if (!selectedItem) return;
 
     // Create spend transaction
-      try {
-        const purchaseTx = new Transaction(
-          userAddress,
-          "marketplace",
-          selectedItem.price,
-          "purchase",
-          { itemId: selectedItem.id, itemName: selectedItem.name }
-        );
-        // For purchases, signTransaction is optional in our simplified model
-        blockchain.addTransaction(purchaseTx);
-      } catch (e) {
-        console.warn("Failed to create purchase transaction:", e);
-      }
+    try {
+      const purchaseTx = new Transaction(
+        userAddress,
+        "marketplace",
+        selectedItem.price,
+        "purchase",
+        { itemId: selectedItem.id, itemName: selectedItem.name }
+      );
+      // For purchases, signTransaction is optional in our simplified model
+      blockchain.addTransaction(purchaseTx);
+    } catch (e) {
+      console.warn("Failed to create purchase transaction:", e);
+    }
 
     // Mine the transaction
     blockchain.minePendingTransactions(userAddress);
@@ -185,6 +203,32 @@ const Marketplace = () => {
 
   return (
     <div className="marketplace-container">
+      {/* Wallet Bar - above navbar */}
+      {userAddress && (
+        <div className="wallet-bar">
+          <div className="wallet-left">
+            <div className="wallet-label">PSIT Wallet</div>
+            <div className="wallet-address" title={userAddress}>
+              {userAddress}
+            </div>
+          </div>
+          <div className="wallet-right">
+            <div className="wallet-balance">
+              <span className="wallet-balance-label">Balance</span>
+              <span className="wallet-balance-amount">{balance} PSIT</span>
+            </div>
+            <div className="wallet-actions">
+              <button className="wallet-action" onClick={copyAddress}>
+                Copy Address
+              </button>
+              <button className="wallet-action primary" onClick={mineNow}>
+                Mine Pending
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="marketplace-header">
         <div className="header-content">
           <h1>
