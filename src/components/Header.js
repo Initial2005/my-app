@@ -37,16 +37,28 @@ const Header = ({
       const bal = blockchain.getBalanceOfAddress(w.address);
       setBalance(bal);
       const transactions = blockchain.getTransactionsForAddress(w.address);
-      const recent = transactions.slice(-5).reverse().map((tx) => ({
-        id: tx.hash || Math.random(),
-        date: new Date(tx.blockTimestamp || tx.timestamp || Date.now()).toLocaleDateString(),
-        change: tx.toAddress === w.address ? tx.amount : -tx.amount,
-        reason: tx.type === "reward" ? "Problem solved" : 
-                tx.type === "achievement_reward" ? "Achievement" :
-                tx.type === "contract_reward" ? "Bonus reward" :
-                tx.type === "daily_bonus" ? "Daily bonus" :
-                tx.type === "purchase" ? "Marketplace purchase" : "Transaction",
-      }));
+      const recent = transactions
+        .slice(-5)
+        .reverse()
+        .map((tx) => ({
+          id: tx.hash || Math.random(),
+          date: new Date(
+            tx.blockTimestamp || tx.timestamp || Date.now()
+          ).toLocaleDateString(),
+          change: tx.toAddress === w.address ? tx.amount : -tx.amount,
+          reason:
+            tx.type === "reward"
+              ? "Problem solved"
+              : tx.type === "achievement_reward"
+              ? "Achievement"
+              : tx.type === "contract_reward"
+              ? "Bonus reward"
+              : tx.type === "daily_bonus"
+              ? "Daily bonus"
+              : tx.type === "purchase"
+              ? "Marketplace purchase"
+              : "Transaction",
+        }));
       setRecentActivity(recent);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,7 +220,8 @@ const Header = ({
             <div className="wallet-address-row">
               <span className="wallet-address-label">Address:</span>
               <code className="wallet-address-code" title={wallet.address}>
-                {wallet.address.substring(0, 16)}...{wallet.address.substring(wallet.address.length - 8)}
+                {wallet.address.substring(0, 16)}...
+                {wallet.address.substring(wallet.address.length - 8)}
               </code>
             </div>
           </div>
@@ -235,7 +248,9 @@ const Header = ({
                   <li key={h.id} className="history-item">
                     <span className="history-date">{h.date}</span>
                     <span
-                      className={`history-change ${h.change > 0 ? "pos" : "neg"}`}
+                      className={`history-change ${
+                        h.change > 0 ? "pos" : "neg"
+                      }`}
                     >
                       {h.change > 0 ? `+${h.change}` : h.change}
                     </span>

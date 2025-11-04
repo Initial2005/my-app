@@ -3,7 +3,6 @@ import { Users, TrendingUp, ExternalLink } from "lucide-react";
 import CodeEditor from "./CodeEditor";
 import { getBlockchain } from "../blockchain";
 import Wallet from "../blockchain/Wallet";
-import { createDefaultContracts } from "../blockchain/SmartContract";
 import AchievementManager from "../blockchain/AchievementManager";
 import StreakManager from "../blockchain/StreakManager";
 import "./Problems.css";
@@ -19,7 +18,6 @@ const Problems = ({ userSettings }) => {
         userSettings?.displayName || "Guest User"
       )
   );
-  const [smartContracts] = useState(() => createDefaultContracts());
   const [achievementManager] = useState(() => new AchievementManager());
   const [streakManager] = useState(() => new StreakManager());
 
@@ -32,22 +30,6 @@ const Problems = ({ userSettings }) => {
 
       // Award base coins for completing the problem
       blockchain.awardCoinsForProblem(userAddress, problem.difficulty, problem);
-
-      // Execute smart contracts
-      const event = {
-        type: "problem_solved",
-        difficulty: problem.difficulty.toLowerCase(),
-        userAddress: userAddress,
-        problemId: problem.id,
-      };
-
-      let bonusRewards = [];
-      smartContracts.forEach((contract) => {
-        const results = contract.execute(event, blockchain, userAddress);
-        if (results) {
-          bonusRewards = bonusRewards.concat(results);
-        }
-      });
 
       // Check for new achievements
       const newAchievements = achievementManager.checkAchievements(
@@ -69,21 +51,6 @@ const Problems = ({ userSettings }) => {
 
       if (streakMultiplier > 1.0) {
         message += `Streak Bonus: ${streakMultiplier}x (${streak.currentStreak} days) 🔥\n`;
-      }
-
-      if (bonusRewards.length > 0) {
-        message += `\n💫 Smart Contract Bonuses:\n`;
-        bonusRewards.forEach((bonus) => {
-          bonus.result.forEach((r) => {
-            if (r.type === "reward") {
-              message += `  + ${r.amount} coins\n`;
-            } else if (r.type === "achievement") {
-              message += `  🏆 Achievement unlocked!\n`;
-            } else if (r.type === "multiplier") {
-              message += `  ⚡ ${r.value}x multiplier activated!\n`;
-            }
-          });
-        });
       }
 
       if (newAchievements.length > 0) {
