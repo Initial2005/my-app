@@ -7,8 +7,8 @@ import Explore from "./Explore";
 import Certificates from "./Certificates";
 import Contest from "./Contest";
 import AdminDashboard from "./AdminDashboard";
+import PSITCoinWallet from "./PSITCoinWallet";
 import Marketplace from "./Marketplace";
-import DashboardHome from "./DashboardHome";
 
 // Settings Section Component
 const SettingsSection = ({ userSettings, onSettingsChange }) => {
@@ -307,7 +307,37 @@ const Dashboard = ({
       )}
 
       {/* Content based on active tab */}
-      {activeTab === "home" && <DashboardHome userSettings={userSettings} />}
+      {activeTab === "home" && (
+        <>
+          {/* Metrics Cards */}
+          <div className="metrics-cards">
+            <div className="metric-card">
+              <h3 className="card-title">Marks</h3>
+              <div className="card-value">85 / 100</div>
+            </div>
+            <div className="metric-card">
+              <h3 className="card-title">Rank</h3>
+              <div className="card-value">#12</div>
+            </div>
+          </div>
+
+          {/* PSIT Coin Wallet (embedded) */}
+          <div className="wallet-section">
+            <PSITCoinWallet embedded userSettings={userSettings} />
+          </div>
+
+          {/* Weekly Progress */}
+          <div className="weekly-progress">
+            <h2 className="progress-title">Weekly Progress</h2>
+            <div className="progress-chart">
+              <div className="bar" style={{ height: "60%" }}></div>
+              <div className="bar" style={{ height: "80%" }}></div>
+              <div className="bar" style={{ height: "45%" }}></div>
+              <div className="bar" style={{ height: "90%" }}></div>
+            </div>
+          </div>
+        </>
+      )}
 
       {activeTab === "problems" && <Problems userSettings={userSettings} />}
 
