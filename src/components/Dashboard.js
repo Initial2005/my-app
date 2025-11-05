@@ -321,8 +321,12 @@ const Dashboard = ({
           {/* Stats Grid - Top Row */}
           <div className="stats-grid">
             <div className="stat-card psit-coins">
-              <div className="stat-icon">
-                <span>🪙</span>
+              <div className="stat-icon psit-coin-icon">
+                <img
+                  src="/assets/psit-coin.png"
+                  alt="PSIT Coin"
+                  className="coin-image"
+                />
               </div>
               <div className="stat-content">
                 <div className="stat-label">PSIT COINS</div>
