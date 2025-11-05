@@ -7,7 +7,6 @@ import Explore from "./Explore";
 import Certificates from "./Certificates";
 import Contest from "./Contest";
 import AdminDashboard from "./AdminDashboard";
-import PSITCoinWallet from "./PSITCoinWallet";
 import Marketplace from "./Marketplace";
 
 // Settings Section Component
@@ -309,31 +308,149 @@ const Dashboard = ({
       {/* Content based on active tab */}
       {activeTab === "home" && (
         <>
-          {/* Metrics Cards */}
-          <div className="metrics-cards">
-            <div className="metric-card">
-              <h3 className="card-title">Marks</h3>
-              <div className="card-value">85 / 100</div>
+          {/* Welcome Banner */}
+          <div className="welcome-banner">
+            <h1 className="welcome-title">
+              Welcome back, {userSettings?.displayName || "Student"}! 👋
+            </h1>
+            <p className="welcome-subtitle">
+              Ready to continue your learning journey?
+            </p>
+          </div>
+
+          {/* Stats Grid - Top Row */}
+          <div className="stats-grid">
+            <div className="stat-card psit-coins">
+              <div className="stat-icon">
+                <span>🪙</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-label">PSIT COINS</div>
+                <div className="stat-value">10</div>
+                <div className="stat-change">↑ +0 all time</div>
+              </div>
             </div>
-            <div className="metric-card">
-              <h3 className="card-title">Rank</h3>
-              <div className="card-value">#12</div>
+
+            <div className="stat-card problems-solved">
+              <div className="stat-icon">
+                <span>{"</>"}</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-label">PROBLEMS SOLVED</div>
+                <div className="stat-breakdown">
+                  <span className="easy">0 Easy</span>
+                  <span className="medium">0 Med</span>
+                  <span className="hard">0 Hard</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card current-streak">
+              <div className="stat-icon">
+                <span>🔥</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-label">CURRENT STREAK</div>
+                <div className="stat-value">0</div>
+              </div>
+            </div>
+
+            <div className="stat-card achievements">
+              <div className="stat-icon">
+                <span>🏆</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-label">ACHIEVEMENTS</div>
+                <div className="stat-value">0</div>
+              </div>
             </div>
           </div>
 
-          {/* PSIT Coin Wallet (embedded) */}
-          <div className="wallet-section">
-            <PSITCoinWallet embedded userSettings={userSettings} />
+          {/* Stats Grid - Bottom Row */}
+          <div className="stats-grid-bottom">
+            <div className="stat-card global-rank">
+              <div className="stat-icon">
+                <span>🏅</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-label">GLOBAL RANK</div>
+                <div className="stat-change green">↑ Top 10%</div>
+              </div>
+            </div>
+
+            <div className="stat-card weekly-goal">
+              <div className="stat-icon">
+                <span>🎯</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-label">WEEKLY GOAL</div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: "0%" }}></div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Weekly Progress */}
-          <div className="weekly-progress">
-            <h2 className="progress-title">Weekly Progress</h2>
-            <div className="progress-chart">
-              <div className="bar" style={{ height: "60%" }}></div>
-              <div className="bar" style={{ height: "80%" }}></div>
-              <div className="bar" style={{ height: "45%" }}></div>
-              <div className="bar" style={{ height: "90%" }}></div>
+          {/* Activity Sections */}
+          <div className="activity-grid">
+            <div className="activity-section weekly-activity">
+              <div className="activity-header">
+                <h3>📈 Weekly Activity</h3>
+                <span className="activity-meta">1 problems this week</span>
+              </div>
+              <div className="activity-chart">
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "0%" }}></div>
+                  <span className="bar-label">Thu</span>
+                  <span className="bar-value">0</span>
+                </div>
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "0%" }}></div>
+                  <span className="bar-label">Fri</span>
+                  <span className="bar-value">0</span>
+                </div>
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "0%" }}></div>
+                  <span className="bar-label">Sat</span>
+                  <span className="bar-value">0</span>
+                </div>
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "0%" }}></div>
+                  <span className="bar-label">Sun</span>
+                  <span className="bar-value">0</span>
+                </div>
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "0%" }}></div>
+                  <span className="bar-label">Mon</span>
+                  <span className="bar-value">0</span>
+                </div>
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "0%" }}></div>
+                  <span className="bar-label">Tue</span>
+                  <span className="bar-value">0</span>
+                </div>
+                <div className="chart-bar">
+                  <div className="bar-fill" style={{ height: "100%" }}></div>
+                  <span className="bar-label">Wed</span>
+                  <span className="bar-value">1</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="activity-section recent-activity">
+              <div className="activity-header">
+                <h3>🕐 Recent Activity</h3>
+                <span className="activity-meta">Last 5 actions</span>
+              </div>
+              <div className="recent-list">
+                <div className="recent-item">
+                  <div className="recent-info">
+                    <div className="recent-title">Activity</div>
+                    <div className="recent-time">51m ago</div>
+                  </div>
+                  <div className="recent-coins">+10</div>
+                </div>
+              </div>
             </div>
           </div>
         </>
