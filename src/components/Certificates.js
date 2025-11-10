@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Certificates.css";
 import {
   Award,
@@ -13,8 +13,11 @@ import {
 
 const Certificates = () => {
   const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [completedCourses, setCompletedCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const completedCourses = [
+  const sampleCourses = [
     {
       id: 1,
       courseName: "Python for Beginners",
@@ -61,6 +64,49 @@ const Certificates = () => {
       },
     },
   ];
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchCertificates() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('http://localhost:4000/api/certificates');
+        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+        const data = await res.json();
+        if (mounted) {
+          // map server documents into the expected client shape
+          const mapped = data.map((d, idx) => ({
+            id: idx + 1,
+            courseName: d.title || 'Untitled',
+            language: d.language || 'N/A',
+            completedDate: new Date(d.issuedAt || d.createdAt).toLocaleDateString(),
+            instructor: d.issuer || 'Unknown',
+            certificateId: d._id,
+            score: d.score || 0,
+            thumbnail: '🎓',
+            badge: {
+              name: d.title || 'Certificate',
+              color: '#4A9EFF',
+              icon: '🏆',
+            },
+          }));
+          setCompletedCourses(mapped);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch certificates:', err.message);
+        if (mounted) {
+          setError(err.message);
+          setCompletedCourses(sampleCourses);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    fetchCertificates();
+    return () => { mounted = false; };
+  }, []);
 
   const allBadges = [
     {
@@ -167,7 +213,7 @@ const Certificates = () => {
           <div className="stat-box">
             <Trophy size={24} color="#FFD700" />
             <div>
-              <div className="stat-value">{completedCourses.length}</div>
+              <div className="stat-value">{loading ? '...' : completedCourses.length}</div>
               <div className="stat-label">Certificates</div>
             </div>
           </div>
@@ -232,7 +278,9 @@ const Certificates = () => {
           Course Certificates
         </h3>
         <div className="certificates-grid">
-          {completedCourses.map((certificate) => (
+          {loading && <div className="loading">Loading certificates…</div>}
+          {error && <div className="error">Failed to load: {error}</div>}
+          {!loading && completedCourses.map((certificate) => (
             <div key={certificate.id} className="certificate-card">
               <div className="certificate-header-section">
                 <div className="cert-thumbnail">
